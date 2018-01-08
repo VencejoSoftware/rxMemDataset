@@ -1,42 +1,51 @@
-{*******************************************************}
-{                                                       }
-{         Delphi VCL Extensions (RX)                    }
-{                                                       }
-{         Copyright (c) 1998 Master-Bank                }
-{                                                       }
-{ Patched by Polaris Software                           }
-{ Revision for unicode and enhacenment added by JB.     }
-{                                                       }
-{ 17-06-2011 JB. + pchar buffer revision                }
-{ 29-08-2011 JB. + blob revision for Delphi 2009/2010/XE}
-{*******************************************************}
+{ ******************************************************* }
+{ }
+{ Delphi VCL Extensions (RX) }
+{ }
+{ Copyright (c) 1998 Master-Bank }
+{ }
+{ Patched by Polaris Software }
+{ Revision for unicode and enhacenment added by JB. }
+{ }
+{ 17-06-2011 JB. + pchar buffer revision }
+{ 29-08-2011 JB. + blob revision for Delphi 2009/2010/XE }
+{ ******************************************************* }
 
 unit RxMemDS;
-
 {$I RX.INC}
 {$WARNINGS OFF}
+
 interface
 
 {$IFDEF RX_D3}
 
 uses
-  Windows, SysUtils, Classes, Controls,
-  {$IFDEF RX_D6}Types,{$ENDIF}
-  {$IFDEF RX_D17}System.Generics.Collections, {$ENDIF}
-  DB, RxDBUtils;
+  Windows, SysUtils, Classes, Controls, Math,
+{$IFDEF RX_D6} Types, {$ENDIF}
+{$IFDEF RX_D17} System.Generics.Collections, {$ENDIF}
+  DB;
 
 { TRxMemoryData }
 
 type
+{$IFDEF RX_D12}
+  TBookmarkType = TBookmark;
+  TBookmarkPointerType = Pointer;
+  TBuffer = TRecordBuffer;
+{$ELSE}
+  TBookmarkType = TBookmarkStr;
+  TBookmarkPointerType = TBookmark;
+  TBuffer = PChar;
+{$ENDIF}
   TMemBlobData = AnsiString;
-  TMemBlobArray = array[0..0] of TMemBlobData;
+  TMemBlobArray = array [0 .. 0] of TMemBlobData;
   TBlobDataArrayType = ^TMemBlobArray;
   TBlobDataType = TMemBlobData;
   PMemBlobArray = ^TMemBlobArray;
 
   TMemoryRecord = class;
   TLoadMode = (lmCopy, lmAppend);
-  TCompareRecords = function (Item1, Item2: TMemoryRecord): Integer of object;
+  TCompareRecords = function(Item1, Item2: TMemoryRecord): Integer of object;
 
   TRxMemoryData = class(TDataSet)
   private
@@ -80,28 +89,26 @@ type
     procedure SetBlobData(Field: TField; Buffer: TBuffer; Value: TBlobDataType);
     function AllocRecordBuffer: TBuffer; override;
     procedure FreeRecordBuffer(var Buffer: TBuffer); override;
-    {$IFNDEF RX_D5}
+{$IFNDEF RX_D5}
     function BCDToCurr(BCD: Pointer; var Curr: Currency): Boolean; override;
-    function CurrToBCD(const Curr: Currency; BCD: Pointer; Precision,
-      Decimals: Integer): Boolean; override;
-    {$ENDIF}
+    function CurrToBCD(const Curr: Currency; BCD: Pointer; Precision, Decimals: Integer): Boolean; override;
+{$ENDIF}
     procedure InternalInitRecord(Buffer: TBuffer); override;
     procedure ClearCalcFields(Buffer: TBuffer); override;
-    function GetRecord(Buffer: TBuffer; GetMode: TGetMode;
-      DoCheck: Boolean): TGetResult; override;
+    function GetRecord(Buffer: TBuffer; GetMode: TGetMode; DoCheck: Boolean): TGetResult; override;
     function GetRecordSize: Word; override;
     procedure SetFiltered(Value: Boolean); override;
     procedure SetOnFilterRecord(const Value: TFilterRecordEvent); override;
-    {$IFDEF RX_D17}
+{$IFDEF RX_D17}
     procedure SetFieldData(Field: TField; Buffer: TValueBuffer); overload; override;
-    {$ENDIF}
+{$ENDIF}
     procedure SetFieldData(Field: TField; Buffer: Pointer); override;
     procedure CloseBlob(Field: TField); override;
     procedure GetBookmarkData(Buffer: TBuffer; Data: Pointer); override;
-    {$IFDEF RX_D17}
+{$IFDEF RX_D17}
     procedure GetBookmarkData(Buffer: TRecordBuffer; Data: TBookmark); overload; override;
     procedure SetBookmarkData(Buffer: TRecordBuffer; Data: TBookmark); overload; override;
-    {$ENDIF}
+{$ENDIF}
     function GetBookmarkFlag(Buffer: TBuffer): TBookmarkFlag; override;
     procedure InternalGotoBookmark(Bookmark: TBookmarkPointerType); override;
     procedure InternalSetToRecord(Buffer: TBuffer); override;
@@ -112,9 +119,9 @@ type
     procedure InternalLast; override;
     procedure InitRecord(Buffer: TBuffer); override;
     procedure InternalAddRecord(Buffer: Pointer; Append: Boolean); override;
-    {$IFDEF RX_D17}
+{$IFDEF RX_D17}
     procedure InternalAddRecord(Buffer: TRecordBuffer; Append: Boolean); overload; override;
-    {$ENDIF}
+{$ENDIF}
     procedure InternalDelete; override;
     procedure InternalPost; override;
     procedure InternalClose; override;
@@ -134,15 +141,13 @@ type
     function CompareBookmarks(Bookmark1, Bookmark2: TBookmark): Integer; override;
     function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
     function GetFieldData(Field: TField; Buffer: Pointer): Boolean; override;
-    {$IFDEF RX_D17}
-    function GetFieldData(Field: TField; {$IFDEF RX_D18}var {$ENDIF}Buffer: TValueBuffer): Boolean; overload; override;
-    {$ENDIF}
+{$IFDEF RX_D17}
+    function GetFieldData(Field: TField; {$IFDEF RX_D18}var {$ENDIF} Buffer: TValueBuffer): Boolean; overload; override;
+{$ENDIF}
     function GetCurrentRecord(Buffer: TBuffer): Boolean; override;
     function IsSequenced: Boolean; override;
-    function Locate(const KeyFields: string; const KeyValues: Variant;
-      Options: TLocateOptions): Boolean; override;
-    function Lookup(const KeyFields: string; const KeyValues: Variant;
-      const ResultFields: string): Variant; override;
+    function Locate(const KeyFields: string; const KeyValues: Variant; Options: TLocateOptions): Boolean; override;
+    function Lookup(const KeyFields: string; const KeyValues: Variant; const ResultFields: string): Variant; override;
     procedure SortOnFields(const FieldNames: string;
 {$IFDEF RX_D4}
       CaseInsensitive: Boolean = True; Descending: Boolean = False);
@@ -151,8 +156,7 @@ type
 {$ENDIF}
     procedure EmptyTable;
     procedure CopyStructure(Source: TDataSet);
-    function LoadFromDataSet(Source: TDataSet; RecordCount: Integer;
-      Mode: TLoadMode): Integer;
+    function LoadFromDataSet(Source: TDataSet; RecordCount: Integer; Mode: TLoadMode): Integer;
     function SaveToDataSet(Dest: TDataSet; RecordCount: Integer): Integer;
   published
     property Capacity: Integer read GetCapacity write SetCapacity default 0;
@@ -205,14 +209,14 @@ type
     constructor Create(Field: TBlobField; Mode: TBlobStreamMode);
     destructor Destroy; override;
     function Read(var Buffer; Count: Longint): Longint; override;
-    {$IFDEF RX_D17}
-    function Write(const Buffer: TBytes; Offset, Count: Longint): Longint;  overload; override;
-    {$ENDIF}
+{$IFDEF RX_D17}
+    function Write(const Buffer: TBytes; Offset, Count: Longint): Longint; overload; override;
+{$ENDIF}
     function Write(const Buffer; Count: Longint): Longint; override;
     function Seek(Offset: Longint; Origin: Word): Longint; override;
-    {$IFDEF RX_D16}
+{$IFDEF RX_D16}
     function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
-    {$ENDIF}
+{$ENDIF}
     procedure Truncate;
   end;
 
@@ -247,16 +251,16 @@ type
  ** convert to Delphi by Jaro Benes (c)2005
 }
   TSortOrder = (soAsc, soDesc);
-//Possible sorting case sensitivity values
+// Possible sorting case sensitivity values
 // sensitive sorting - insensitive sorting
   TSortCaseSens = (scYes, scNo);
-//---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 //
 // HRxMemoryData is an improved RxLib TRxMemoryData design & runtime component.
 // This is a memory table that doesn't need nor use the BDE nor the DBClient DLL
 // It acts as a TDataSet and can be connected to all standard Delphi
 // data-aware components.
-//New features :
+// New features :
 // record count also actualized in filtered state
 // automatic refreshing on filter changes
 // automatic sort on open
@@ -281,11 +285,11 @@ type
     procedure RefreshFilteredRecordCount;
   public
     constructor Create(AOwner: TComponent); override;
-    procedure ReSortOnFields(pSortOrder: TSortOrder; fields: string {= ''});
+    procedure ReSortOnFields(pSortOrder: TSortOrder; fields: string { = '' } );
     function LoadFromDataSet(Source: TDataSet; RecordCount: Integer; Mode: TLoadMode): Integer; // ^
     procedure EmptyTable;
     procedure CopyStructure(Source: TDataSet);
-    function IsSortField(field: TField): Boolean;
+    function IsSortField(Field: TField): Boolean;
   published
     property SortOrder: TSortOrder read fSortOrder write fSortOrder;
     property SortCaseSens: TSortCaseSens read fSortCaseSens write fSortCaseSens;
@@ -294,7 +298,6 @@ type
     property AutoRefreshOnFilterChanged: Boolean read fAutoRefreshOnFilterChanged write fAutoRefreshOnFilterChanged;
     property RecordCount: Integer read GetFilteredRecordCount;
   end;
-
 {$ENDIF RX_D3}
 
 implementation
@@ -305,28 +308,22 @@ uses
   Forms,
   RxResConst,
   DbConsts {$IFDEF RX_D5}, ComObj {$ENDIF}
-  {$IFDEF RX_D6} , Variants {$ENDIF}; // Polaris
+{$IFDEF RX_D6}, Variants {$ENDIF}; // Polaris
 
 const
-  ftBlobTypes = [ftBlob, ftMemo, ftGraphic, ftFmtMemo, ftParadoxOle,
-    ftDBaseOle, ftTypedBinary {$IFDEF RX_D5}, ftOraBlob, ftOraClob {$ENDIF}];
+  ftBlobTypes = [ftBlob, ftMemo, ftGraphic, ftFmtMemo, ftParadoxOle, ftDBaseOle, ftTypedBinary
+{$IFDEF RX_D5}, ftOraBlob, ftOraClob {$ENDIF}];
 
-  ftSupported = [ftString, ftSmallint, ftInteger, ftWord, ftBoolean, ftFloat,
-    ftCurrency, ftDate, ftTime, ftDateTime, ftAutoInc, ftBCD, ftBytes,
-    ftVarBytes {$IFDEF RX_D4}, ftADT, ftFixedChar, ftWideString,
-    ftLargeint {$ENDIF} {$IFDEF RX_D5}, ftVariant, ftGuid {$ENDIF}] + 
-    ftBlobTypes;
+  ftSupported = [ftString, ftSmallint, ftInteger, ftWord, ftBoolean, ftFloat, ftCurrency, ftDate, ftTime, ftDateTime,
+    ftAutoInc, ftBCD, ftBytes, ftVarBytes {$IFDEF RX_D4}, ftADT, ftFixedChar, ftWideString, ftLargeint {$ENDIF} {$IFDEF RX_D5}, ftVariant, ftGuid {$ENDIF}] + ftBlobTypes;
 
   fkStoredFields = [fkData];
-
 {$IFDEF RX_D5}
   GuidSize = 38;
 {$ENDIF}
-
 { Utility routines }
 
-function CompareFields(Data1, Data2: Pointer; FieldType: TFieldType;
-  CaseInsensitive: Boolean): Integer;
+function CompareFields(Data1, Data2: Pointer; FieldType: TFieldType; CaseInsensitive: Boolean): Integer;
 begin
   Result := 0;
   case FieldType of
@@ -336,24 +333,42 @@ begin
       else
         Result := AnsiCompareStr(PChar(Data1), PChar(Data2));
     ftSmallint:
-      if SmallInt(Data1^) > SmallInt(Data2^) then Result := 1
-      else if SmallInt(Data1^) < SmallInt(Data2^) then Result := -1;
+      if SmallInt(Data1^) > SmallInt(Data2^) then
+        Result := 1
+      else
+        if SmallInt(Data1^) < SmallInt(Data2^) then
+          Result := - 1;
     ftInteger, ftDate, ftTime, ftAutoInc:
-      if Longint(Data1^) > Longint(Data2^) then Result := 1
-      else if Longint(Data1^) < Longint(Data2^) then Result := -1;
+      if Longint(Data1^) > Longint(Data2^) then
+        Result := 1
+      else
+        if Longint(Data1^) < Longint(Data2^) then
+          Result := - 1;
     ftWord:
-      if Word(Data1^) > Word(Data2^) then Result := 1
-      else if Word(Data1^) < Word(Data2^) then Result := -1;
+      if Word(Data1^) > Word(Data2^) then
+        Result := 1
+      else
+        if Word(Data1^) < Word(Data2^) then
+          Result := - 1;
     ftBoolean:
-      if WordBool(Data1^) and not WordBool(Data2^) then Result := 1
-      else if not WordBool(Data1^) and WordBool(Data2^) then Result := -1;
+      if WordBool(Data1^) and not WordBool(Data2^) then
+        Result := 1
+      else
+        if not WordBool(Data1^) and WordBool(Data2^) then
+          Result := - 1;
     ftFloat, ftCurrency:
-      if Double(Data1^) > Double(Data2^) then Result := 1
-      else if Double(Data1^) < Double(Data2^) then Result := -1;
+      if Double(Data1^) > Double(Data2^) then
+        Result := 1
+      else
+        if Double(Data1^) < Double(Data2^) then
+          Result := - 1;
     ftDateTime:
-      if TDateTime(Data1^) > TDateTime(Data2^) then Result := 1
-      else if TDateTime(Data1^) < TDateTime(Data2^) then Result := -1;
-    {$IFDEF RX_D4}
+      if TDateTime(Data1^) > TDateTime(Data2^) then
+        Result := 1
+      else
+        if TDateTime(Data1^) < TDateTime(Data2^) then
+          Result := - 1;
+{$IFDEF RX_D4}
     ftFixedChar:
       if CaseInsensitive then
         Result := AnsiCompareText(PChar(Data1), PChar(Data2))
@@ -361,21 +376,22 @@ begin
         Result := AnsiCompareStr(PChar(Data1), PChar(Data2));
     ftWideString:
       if CaseInsensitive then
-        Result := AnsiCompareText(WideCharToString(PWideChar(Data1)),
-          WideCharToString(PWideChar(Data2)))
+        Result := AnsiCompareText(WideCharToString(PWideChar(Data1)), WideCharToString(PWideChar(Data2)))
       else
-        Result := AnsiCompareStr(WideCharToString(PWideChar(Data1)),
-          WideCharToString(PWideChar(Data2)));
-    ftLargeint: 
-      if Int64(Data1^) > Int64(Data2^) then Result := 1
-      else if Int64(Data1^) < Int64(Data2^) then Result := -1;
-    {$ENDIF}
-    {$IFDEF RX_D5}
+        Result := AnsiCompareStr(WideCharToString(PWideChar(Data1)), WideCharToString(PWideChar(Data2)));
+    ftLargeint:
+      if Int64(Data1^) > Int64(Data2^) then
+        Result := 1
+      else
+        if Int64(Data1^) < Int64(Data2^) then
+          Result := - 1;
+{$ENDIF}
+{$IFDEF RX_D5}
     ftVariant:
       Result := 0;
     ftGuid:
       Result := AnsiCompareText(PChar(Data1), PChar(Data2));
-    {$ENDIF}
+{$ENDIF}
   end;
 end;
 
@@ -384,37 +400,37 @@ begin
   if not (FieldType in ftSupported) then
     Result := 0
   else
-  if (FieldType in ftBlobTypes) then
-    Result := SizeOf(Longint)
-  else
-  begin
-    Result := Size;
-    case FieldType of
-      ftString: Inc(Result);
-      ftSmallint: Result := SizeOf(SmallInt);
-      ftInteger: Result := SizeOf(Longint);
-      ftWord: Result := SizeOf(Word);
-      ftBoolean: Result := SizeOf(WordBool);
-      ftFloat: Result := SizeOf(Double);
-      ftCurrency: Result := SizeOf(Double);
-      ftBCD: Result := 34;
-      ftDate, ftTime: Result := SizeOf(Longint);
-      ftDateTime: Result := SizeOf(TDateTime);
-      ftBytes: Result := Size;
-      ftVarBytes: Result := Size + 2;
-      ftAutoInc: Result := SizeOf(Longint);
-      {$IFDEF RX_D4}
-      ftADT: Result := 0;
-      ftFixedChar: Inc(Result);
-      ftWideString: Result := (Result + 1) * 2;
-      ftLargeint: Result := SizeOf(Int64);
-      {$ENDIF}
-      {$IFDEF RX_D5}
-      ftVariant: Result := SizeOf(Variant);
-      ftGuid: Result := GuidSize + 1;
-      {$ENDIF}
+    if (FieldType in ftBlobTypes) then
+      Result := SizeOf(Longint)
+    else
+    begin
+      Result := Size;
+      case FieldType of
+        ftString: Inc(Result);
+        ftSmallint: Result := SizeOf(SmallInt);
+        ftInteger: Result := SizeOf(Longint);
+        ftWord: Result := SizeOf(Word);
+        ftBoolean: Result := SizeOf(WordBool);
+        ftFloat: Result := SizeOf(Double);
+        ftCurrency: Result := SizeOf(Double);
+        ftBCD: Result := 34;
+        ftDate, ftTime: Result := SizeOf(Longint);
+        ftDateTime: Result := SizeOf(TDateTime);
+        ftBytes: Result := Size;
+        ftVarBytes: Result := Size + 2;
+        ftAutoInc: Result := SizeOf(Longint);
+{$IFDEF RX_D4}
+        ftADT: Result := 0;
+        ftFixedChar: Inc(Result);
+        ftWideString: Result := (Result + 1) * 2;
+        ftLargeint: Result := SizeOf(Int64);
+{$ENDIF}
+{$IFDEF RX_D5}
+        ftVariant: Result := SizeOf(Variant);
+        ftGuid: Result := GuidSize + 1;
+{$ENDIF}
+      end;
     end;
-  end;
 end;
 
 procedure CalcDataSize(FieldDef: TFieldDef; var DataSize: Integer);
@@ -427,10 +443,10 @@ begin
   begin
     if (DataType in ftSupported - ftBlobTypes) then
       Inc(DataSize, CalcFieldLen(DataType, Size) + 1);
-    {$IFDEF RX_D4}
+{$IFDEF RX_D4}
     for I := 0 to ChildDefs.Count - 1 do
       CalcDataSize(ChildDefs[I], DataSize);
-    {$ENDIF}
+{$ENDIF}
   end;
 end;
 
@@ -439,7 +455,7 @@ begin
   DatabaseError(Msg);
 end;
 
-procedure ErrorFmt(const Msg: string; const Args: array of const);
+procedure ErrorFmt(const Msg: string; const Args: array of const );
 begin
   DatabaseErrorFmt(Msg, Args);
 end;
@@ -447,6 +463,7 @@ end;
 type
   TBookmarkData = Integer;
   PMemBookmarkInfo = ^TMemBookmarkInfo;
+
   TMemBookmarkInfo = packed record
     BookmarkData: TBookmarkData;
     BookmarkFlag: TBookmarkFlag;
@@ -459,8 +476,7 @@ begin
   CreateEx(MemoryData, True);
 end;
 
-constructor TMemoryRecord.CreateEx(MemoryData: TRxMemoryData;
-  UpdateParent: Boolean);
+constructor TMemoryRecord.CreateEx(MemoryData: TRxMemoryData; UpdateParent: Boolean);
 begin
   inherited Create;
   SetMemoryData(MemoryData, UpdateParent);
@@ -474,8 +490,10 @@ end;
 
 function TMemoryRecord.GetIndex: Integer;
 begin
-  if FMemoryData <> nil then Result := FMemoryData.FRecords.IndexOf(Self)
-  else Result := -1;
+  if FMemoryData <> nil then
+    Result := FMemoryData.FRecords.IndexOf(Self)
+  else
+    Result := - 1;
 end;
 
 procedure TMemoryRecord.SetMemoryData(Value: TRxMemoryData; UpdateParent: Boolean);
@@ -530,7 +548,7 @@ end;
 constructor TRxMemoryData.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FRecordPos := -1;
+  FRecordPos := - 1;
   FLastID := Low(Integer);
   FAutoInc := 1;
   FRecords := TList.Create;
@@ -549,13 +567,16 @@ end;
 
 function TRxMemoryData.GetCapacity: Integer;
 begin
-  if FRecords <> nil then Result := FRecords.Capacity
-  else Result := 0;
+  if FRecords <> nil then
+    Result := FRecords.Capacity
+  else
+    Result := 0;
 end;
 
 procedure TRxMemoryData.SetCapacity(Value: Integer);
 begin
-  if FRecords <> nil then FRecords.Capacity := Value;
+  if FRecords <> nil then
+    FRecords.Capacity := Value;
 end;
 
 function TRxMemoryData.AddRecord: TMemoryRecord;
@@ -570,7 +591,8 @@ begin
   for I := 0 to FRecords.Count - 1 do
   begin
     Result := TMemoryRecord(FRecords[I]);
-    if Result.ID = ID then Exit;
+    if Result.ID = ID then
+      Exit;
   end;
   Result := nil;
 end;
@@ -587,16 +609,15 @@ begin
 end;
 
 { Field Management }
-
 {$IFNDEF RX_D5}
+
 function TRxMemoryData.BCDToCurr(BCD: Pointer; var Curr: Currency): Boolean;
 begin
   Move(BCD^, Curr, SizeOf(Currency));
   Result := True;
 end;
 
-function TRxMemoryData.CurrToBCD(const Curr: Currency; BCD: Pointer; Precision,
-  Decimals: Integer): Boolean;
+function TRxMemoryData.CurrToBCD(const Curr: Currency; BCD: Pointer; Precision, Decimals: Integer): Boolean;
 begin
   Move(Curr, BCD^, SizeOf(Currency));
   Result := True;
@@ -612,7 +633,7 @@ begin
   begin
     for I := 0 to FieldCount - 1 do
     begin
-      with Fields[I] do
+      with fields[I] do
         if (FieldKind in fkStoredFields) and not (DataType in ftSupported) then
           ErrorFmt(SUnknownFieldType, [DisplayName]);
     end;
@@ -637,7 +658,7 @@ begin
   if FieldDefs.Count = 0 then
     for I := 0 to FieldCount - 1 do
     begin
-      with Fields[I] do
+      with fields[I] do
         if (FieldKind = fkData) then
           FieldDefs.Add(FieldName, DataType, Size, Required);
     end;
@@ -686,7 +707,8 @@ end;
 
 procedure TRxMemoryData.InitBufferPointers(GetProps: Boolean);
 begin
-  if GetProps then FRecordSize := CalcRecordSize;
+  if GetProps then
+    FRecordSize := CalcRecordSize;
   FBookmarkOfs := FRecordSize + CalcFieldsSize;
   FBlobOfs := FBookmarkOfs + SizeOf(TMemBookmarkInfo);
   FRecBufSize := FBlobOfs + BlobFieldCount * SizeOf(Pointer);
@@ -694,9 +716,10 @@ end;
 
 procedure TRxMemoryData.ClearRecords;
 begin
-  while FRecords.Count > 0 do TObject(FRecords.Last).Free;
+  while FRecords.Count > 0 do
+    TObject(FRecords.Last).Free;
   FLastID := Low(Integer);
-  FRecordPos := -1;
+  FRecordPos := - 1;
 end;
 
 function TRxMemoryData.AllocRecordBuffer: TBuffer;
@@ -775,8 +798,7 @@ begin
   GetCalcFields(Buffer);
 end;
 
-function TRxMemoryData.GetRecord(Buffer: TBuffer; GetMode: TGetMode;
-  DoCheck: Boolean): TGetResult;
+function TRxMemoryData.GetRecord(Buffer: TBuffer; GetMode: TGetMode; DoCheck: Boolean): TGetResult;
 var
   Accept: Boolean;
 begin
@@ -787,35 +809,39 @@ begin
       if FRecordPos <= 0 then
       begin
         Result := grBOF;
-        FRecordPos := -1;
+        FRecordPos := - 1;
       end
       else
       begin
         repeat
           Dec(FRecordPos);
-          if Filtered then Accept := RecordFilter;
+          if Filtered then
+            Accept := RecordFilter;
         until Accept or (FRecordPos < 0);
         if not Accept then
         begin
           Result := grBOF;
-          FRecordPos := -1;
+          FRecordPos := - 1;
         end;
       end;
     gmCurrent:
       if (FRecordPos < 0) or (FRecordPos >= RecordCount) then
         Result := grError
       else
-      if Filtered then
-      begin
-        if not RecordFilter then Result := grError;
-      end;
+        if Filtered then
+        begin
+          if not RecordFilter then
+            Result := grError;
+        end;
     gmNext:
-      if FRecordPos >= RecordCount - 1 then Result := grEOF
+      if FRecordPos >= RecordCount - 1 then
+        Result := grEOF
       else
       begin
         repeat
           Inc(FRecordPos);
-          if Filtered then Accept := RecordFilter;
+          if Filtered then
+            Accept := RecordFilter;
         until Accept or (FRecordPos > RecordCount - 1);
         if not Accept then
         begin
@@ -824,8 +850,11 @@ begin
         end;
       end;
   end;
-  if Result = grOk then RecordToBuffer(Records[FRecordPos], Buffer)
-  else if (Result = grError) and DoCheck then Error(RxLoadStr(SMemNoRecords));
+  if Result = grOk then
+    RecordToBuffer(Records[FRecordPos], Buffer)
+  else
+    if (Result = grError) and DoCheck then
+      Error(RxLoadStr(SMemNoRecords));
 end;
 
 function TRxMemoryData.GetRecordSize: Word;
@@ -837,8 +866,10 @@ function TRxMemoryData.GetActiveRecBuf(var RecBuf: TBuffer): Boolean;
 begin
   case State of
     dsBrowse:
-      if IsEmpty then RecBuf := nil
-      else RecBuf := TBuffer(ActiveBuffer);
+      if IsEmpty then
+        RecBuf := nil
+      else
+        RecBuf := TBuffer(ActiveBuffer);
     dsEdit, dsInsert: RecBuf := TBuffer(ActiveBuffer);
     dsCalcFields: RecBuf := TBuffer(CalcBuffer);
     dsFilter: RecBuf := TBuffer(TempBuffer);
@@ -856,7 +887,8 @@ var
 {$ENDIF}
 begin
   Result := False;
-  if not GetActiveRecBuf(RecBuf) then Exit;
+  if not GetActiveRecBuf(RecBuf) then
+    Exit;
   if Field.FieldNo > 0 then
   begin
     Data := FindFieldData(RecBuf, Field);
@@ -865,19 +897,18 @@ begin
       Result := Boolean(Data[0]);
       Inc(Data);
       if Field.DataType in [ftString
-        {$IFDEF RX_D4}, ftFixedChar, ftWideString {$ENDIF}
-        {$IFDEF RX_D5}, ftGuid {$ENDIF}]
-      then
+{$IFDEF RX_D4}, ftFixedChar, ftWideString {$ENDIF}
+{$IFDEF RX_D5}, ftGuid {$ENDIF}] then
         Result := Result and {$IFDEF RX_D12}(Data <> nil){$ELSE}(StrLen(Data) > 0){$ENDIF};
       if Result and (Buffer <> nil) then
-        {$IFDEF RX_D5}
+{$IFDEF RX_D5}
         if Field.DataType = ftVariant then
         begin
           VarData := PVariant(Data)^;
           PVariant(Buffer)^ := VarData;
         end
         else
-        {$ENDIF}
+{$ENDIF}
           Move(Data^, Buffer^, CalcFieldLen(Field.DataType, Field.Size));
     end;
   end
@@ -892,9 +923,9 @@ begin
     end;
   end;
 end;
-
 {$IFDEF RX_D17}
-function TRxMemoryData.GetFieldData(Field: TField; {$IFDEF RX_D18}var {$ENDIF}Buffer: TValueBuffer): Boolean;
+
+function TRxMemoryData.GetFieldData(Field: TField; {$IFDEF RX_D18}var {$ENDIF} Buffer: TValueBuffer): Boolean;
 begin
   Result := Self.GetFieldData(Field, Pointer(Buffer))
 end;
@@ -907,13 +938,15 @@ var
   VarData: Variant;
 {$ENDIF}
 begin
-  if not (State in dsWriteModes) then Error(SNotEditing);
+  if not (State in dsWriteModes) then
+    Error(SNotEditing);
   GetActiveRecBuf(RecBuf);
   with Field do
   begin
     if FieldNo > 0 then
     begin
-      if State in [dsCalcFields, dsFilter] then Error(SNotEditing);
+      if State in [dsCalcFields, dsFilter] then
+        Error(SNotEditing);
       if ReadOnly and not (State in [dsSetKey, dsFilter]) then
         ErrorFmt(SFieldReadOnly, [DisplayName]);
       Validate(Buffer);
@@ -922,7 +955,7 @@ begin
         Data := FindFieldData(RecBuf, Field);
         if Data <> nil then
         begin
-        {$IFDEF RX_D5}
+{$IFDEF RX_D5}
           if DataType = ftVariant then
           begin
             if Buffer <> nil then
@@ -935,38 +968,40 @@ begin
               Inc(Data);
               PVariant(Data)^ := VarData;
             end
-            else FillChar(Data^, CalcFieldLen(DataType, Size), 0);
+            else
+              FillChar(Data^, CalcFieldLen(DataType, Size), 0);
           end
           else
-        {$ENDIF}
+{$ENDIF}
           begin
             Boolean(Data[0]) := LongBool(Buffer);
             Inc(Data);
             if LongBool(Buffer) then
               Move(Buffer^, Data^, CalcFieldLen(DataType, Size))
-            else FillChar(Data^, CalcFieldLen(DataType, Size), 0);
+            else
+              FillChar(Data^, CalcFieldLen(DataType, Size), 0);
           end;
         end;
       end;
     end
-    else {fkCalculated, fkLookup}
+    else { fkCalculated, fkLookup }
     begin
       Inc(RecBuf, FRecordSize + Offset);
       Boolean(RecBuf[0]) := LongBool(Buffer);
-      if Boolean(RecBuf[0]) then Move(Buffer^, RecBuf[1], DataSize);
+      if Boolean(RecBuf[0]) then
+        Move(Buffer^, RecBuf[1], DataSize);
     end;
     if not (State in [dsCalcFields, dsFilter, dsNewValue]) then
       DataEvent(deFieldChange, Longint(Field));
   end;
 end;
-
 {$IFDEF RX_D17}
+
 procedure TRxMemoryData.SetFieldData(Field: TField; Buffer: TValueBuffer);
 begin
   Self.SetFieldData(Field, Pointer(Buffer));
 end;
 {$ENDIF}
-
 { Filter }
 
 procedure TRxMemoryData.SetFiltered(Value: Boolean);
@@ -980,7 +1015,8 @@ begin
       First;
     end;
   end
-  else inherited SetFiltered(Value);
+  else
+    inherited SetFiltered(Value);
 end;
 
 procedure TRxMemoryData.SetOnFilterRecord(const Value: TFilterRecordEvent);
@@ -989,9 +1025,11 @@ begin
   begin
     CheckBrowseMode;
     inherited SetOnFilterRecord(Value);
-    if Filtered then First;
+    if Filtered then
+      First;
   end
-  else inherited SetOnFilterRecord(Value);
+  else
+    inherited SetOnFilterRecord(Value);
 end;
 
 function TRxMemoryData.RecordFilter: Boolean;
@@ -1013,7 +1051,8 @@ begin
       end;
       RestoreState(SaveState);
     end
-    else Result := False;
+    else
+      Result := False;
   end;
 end;
 
@@ -1024,12 +1063,12 @@ begin
   Result := TBlobDataArrayType(Buffer + FBlobOfs)[Field.Offset];
 end;
 
-procedure TRxMemoryData.SetBlobData(Field: TField; Buffer: TBuffer;
-  Value: TBlobDataType);
+procedure TRxMemoryData.SetBlobData(Field: TField; Buffer: TBuffer; Value: TBlobDataType);
 begin
   if Buffer = TBuffer(ActiveBuffer) then
   begin
-    if State = dsFilter then Error(SNotEditing);
+    if State = dsFilter then
+      Error(SNotEditing);
     TBlobDataArrayType(Buffer + FBlobOfs)[Field.Offset] := Value;
   end;
 end;
@@ -1037,8 +1076,8 @@ end;
 procedure TRxMemoryData.CloseBlob(Field: TField);
 begin
   if (FRecordPos >= 0) and (FRecordPos < FRecords.Count) and (State = dsEdit) then
-    TBlobDataArrayType(ActiveBuffer + FBlobOfs)[Field.Offset] :=
-      TBlobDataArrayType(Records[FRecordPos].FBlobs)[Field.Offset]
+    TBlobDataArrayType(ActiveBuffer + FBlobOfs)[Field.Offset] := TBlobDataArrayType(Records[FRecordPos].FBlobs)
+      [Field.Offset]
   else
     TBlobDataArrayType(ActiveBuffer + FBlobOfs)[Field.Offset] := '';
 end;
@@ -1053,32 +1092,38 @@ end;
 function TRxMemoryData.BookmarkValid(Bookmark: TBookmark): Boolean;
 begin
 {$IFDEF RX_D12}
-  Result := FActive and (PInteger(Bookmark)^ > Low(Integer)) and
-    (PInteger(Bookmark)^ <= FLastID);
+  Result := FActive and (PInteger(Bookmark)^ > Low(Integer)) and (PInteger(Bookmark)^ <= FLastID);
 {$ELSE}
-  Result := FActive and (TBookmarkData(Bookmark^) > Low(Integer)) and
-    (TBookmarkData(Bookmark^) <= FLastID);
+  Result := FActive and (TBookmarkData(Bookmark^) > Low(Integer)) and (TBookmarkData(Bookmark^) <= FLastID);
 {$ENDIF}
 end;
 
 function TRxMemoryData.CompareBookmarks(Bookmark1, Bookmark2: TBookmark): Integer;
 begin
-  if (Bookmark1 = nil) and (Bookmark2 = nil) then Result := 0
-  else if (Bookmark1 <> nil) and (Bookmark2 = nil) then Result := 1
-  else if (Bookmark1 = nil) and (Bookmark2 <> nil) then Result := -1
-  else if PInteger(Bookmark1)^ > PInteger(Bookmark2)^ then
-    Result := 1
-  else if PInteger(Bookmark1)^ < PInteger(Bookmark2)^ then
-    Result := -1
-  else Result := 0;
+  if (Bookmark1 = nil) and (Bookmark2 = nil) then
+    Result := 0
+  else
+    if (Bookmark1 <> nil) and (Bookmark2 = nil) then
+      Result := 1
+    else
+      if (Bookmark1 = nil) and (Bookmark2 <> nil) then
+        Result := - 1
+      else
+        if PInteger(Bookmark1)^ > PInteger(Bookmark2)^ then
+          Result := 1
+        else
+          if PInteger(Bookmark1)^ < PInteger(Bookmark2)^ then
+            Result := - 1
+          else
+            Result := 0;
 end;
 
 procedure TRxMemoryData.GetBookmarkData(Buffer: TBuffer; Data: Pointer);
 begin
   Move(PMemBookmarkInfo(Buffer + FBookmarkOfs)^.BookmarkData, Data^, SizeOf(TBookmarkData));
 end;
-
 {$IFDEF RX_D17}
+
 procedure TRxMemoryData.GetBookmarkData(Buffer: TRecordBuffer; Data: TBookmark);
 begin
   Self.GetBookmarkData(Buffer, PByte(@Data[0]));
@@ -1089,11 +1134,11 @@ procedure TRxMemoryData.SetBookmarkData(Buffer: TBuffer; Data: Pointer);
 begin
   Move(Data^, PMemBookmarkInfo(Buffer + FBookmarkOfs)^.BookmarkData, SizeOf(TBookmarkData));
 end;
-
 {$IFDEF RX_D17}
+
 procedure TRxMemoryData.SetBookmarkData(Buffer: TRecordBuffer; Data: TBookmark);
 begin
-  Self.SetBookmarkData(Buffer,PByte(@Data[0]));
+  Self.SetBookmarkData(Buffer, PByte(@Data[0]));
 end;
 {$ENDIF}
 
@@ -1120,9 +1165,11 @@ begin
     SavePos := FRecordPos;
     try
       FRecordPos := Rec.Index;
-      if Filtered then Accept := RecordFilter;
+      if Filtered then
+        Accept := RecordFilter;
     finally
-      if not Accept then FRecordPos := SavePos;
+      if not Accept then
+        FRecordPos := SavePos;
     end;
   end;
 end;
@@ -1136,7 +1183,7 @@ end;
 
 procedure TRxMemoryData.InternalFirst;
 begin
-  FRecordPos := -1;
+  FRecordPos := - 1;
 end;
 
 procedure TRxMemoryData.InternalLast;
@@ -1159,7 +1206,8 @@ procedure TRxMemoryData.SetMemoryRecordData(Buffer: TBuffer; Pos: Integer);
 var
   Rec: TMemoryRecord;
 begin
-  if State = dsFilter then Error(SNotEditing);
+  if State = dsFilter then
+    Error(SNotEditing);
   Rec := Records[Pos];
   AssignMemoryRecord(Rec, Buffer);
 end;
@@ -1171,9 +1219,9 @@ var
 begin
   Count := 0;
   for I := 0 to FieldCount - 1 do
-    if (Fields[I].FieldKind in fkStoredFields) and (Fields[I].DataType = ftAutoInc) then
+    if (fields[I].FieldKind in fkStoredFields) and (fields[I].DataType = ftAutoInc) then
     begin
-      Data := FindFieldData(Buffer, Fields[I]);
+      Data := FindFieldData(Buffer, fields[I]);
       if Data <> nil then
       begin
         Boolean(Data[0]) := True;
@@ -1182,7 +1230,8 @@ begin
         Inc(Count);
       end;
     end;
-  if Count > 0 then Inc(FAutoInc);
+  if Count > 0 then
+    Inc(FAutoInc);
 end;
 
 procedure TRxMemoryData.InternalAddRecord(Buffer: Pointer; Append: Boolean);
@@ -1197,16 +1246,18 @@ begin
   end
   else
   begin
-    if FRecordPos = -1 then RecPos := 0
-    else RecPos := FRecordPos;
+    if FRecordPos = - 1 then
+      RecPos := 0
+    else
+      RecPos := FRecordPos;
     Rec := InsertRecord(RecPos);
     FRecordPos := RecPos;
   end;
   SetAutoIncFields(Buffer);
   SetMemoryRecordData(Buffer, Rec.Index);
 end;
-
 {$IFDEF RX_D17}
+
 procedure TRxMemoryData.InternalAddRecord(Buffer: TRecordBuffer; Append: Boolean);
 begin
   Self.InternalAddRecord(Pointer(Buffer), Append);
@@ -1218,13 +1269,17 @@ var
   Accept: Boolean;
 begin
   Records[FRecordPos].Free;
-  if FRecordPos >= FRecords.Count then Dec(FRecordPos);
+  if FRecordPos >= FRecords.Count then
+    Dec(FRecordPos);
   Accept := True;
   repeat
-    if Filtered then Accept := RecordFilter;
-    if not Accept then Dec(FRecordPos);
+    if Filtered then
+      Accept := RecordFilter;
+    if not Accept then
+      Dec(FRecordPos);
   until Accept or (FRecordPos < 0);
-  if FRecords.Count = 0 then FLastID := Low(Integer);
+  if FRecords.Count = 0 then
+    FLastID := Low(Integer);
 end;
 
 procedure TRxMemoryData.InternalPost;
@@ -1235,7 +1290,8 @@ begin
     SetMemoryRecordData(TBuffer(ActiveBuffer), FRecordPos)
   else
   begin
-    if State in [dsInsert] then SetAutoIncFields(TBuffer(ActiveBuffer));
+    if State in [dsInsert] then
+      SetAutoIncFields(TBuffer(ActiveBuffer));
     if FRecordPos >= FRecords.Count then
     begin
       SetMemoryRecordData(TBuffer(ActiveBuffer), AddRecord.Index);
@@ -1243,8 +1299,10 @@ begin
     end
     else
     begin
-      if FRecordPos = -1 then RecPos := 0
-      else RecPos := FRecordPos;
+      if FRecordPos = - 1 then
+        RecPos := 0
+      else
+        RecPos := FRecordPos;
       SetMemoryRecordData(TBuffer(ActiveBuffer), InsertRecord(RecPos).Index);
       FRecordPos := RecPos;
     end;
@@ -1255,7 +1313,8 @@ procedure TRxMemoryData.OpenCursor(InfoQuery: Boolean);
 begin
   if not InfoQuery then
   begin
-    if FieldCount > 0 then FieldDefs.Clear;
+    if FieldCount > 0 then
+      FieldDefs.Clear;
     InitFieldDefsFromFields;
   end;
   FActive := True;
@@ -1266,9 +1325,11 @@ procedure TRxMemoryData.InternalOpen;
 begin
   BookmarkSize := SizeOf(TBookmarkData);
 {$IFDEF RX_D4}
-  if DefaultFields then CreateFields;
+  if DefaultFields then
+    CreateFields;
 {$ELSE}
-  if DefaultFields then Error(SInvalidFields);
+  if DefaultFields then
+    Error(SInvalidFields);
 {$ENDIF}
   BindFields(True);
   InitBufferPointers(True);
@@ -1281,7 +1342,8 @@ begin
   FAutoInc := 1;
   BindFields(False);
 {$IFDEF RX_D4}
-  if DefaultFields then DestroyFields;
+  if DefaultFields then
+    DestroyFields;
 {$ENDIF}
   FreeIndexList;
   FActive := False;
@@ -1312,8 +1374,10 @@ function TRxMemoryData.GetRecNo: Integer;
 begin
   CheckActive;
   UpdateCursorPos;
-  if (FRecordPos = -1) and (RecordCount > 0) then Result := 1
-  else Result := FRecordPos + 1;
+  if (FRecordPos = - 1) and (RecordCount > 0) then
+    Result := 1
+  else
+    Result := FRecordPos + 1;
 end;
 
 procedure TRxMemoryData.SetRecNo(Value: Integer);
@@ -1331,9 +1395,91 @@ function TRxMemoryData.IsSequenced: Boolean;
 begin
   Result := not Filtered;
 end;
+{$IFNDEF VER80}
 
-function TRxMemoryData.Locate(const KeyFields: string;
-  const KeyValues: Variant; Options: TLocateOptions): Boolean;
+function DataSetLocateThrough(DataSet: TDataSet; const KeyFields: string; const KeyValues: Variant;
+  Options: TLocateOptions): Boolean;
+var
+  FieldCount: Integer;
+  fields: TList {$IFDEF RX_D17}<TField>{$ENDIF};
+  Bookmark: TBookmarkType;
+
+  function CompareField(Field: TField; Value: Variant): Boolean;
+  var
+    S: string;
+  begin
+    if Field.DataType = ftString then
+    begin
+      S := Field.AsString;
+      if (loPartialKey in Options) then
+        Delete(S, Length(Value) + 1, MaxInt);
+      if (loCaseInsensitive in Options) then
+        Result := AnsiCompareText(S, Value) = 0
+      else
+        Result := AnsiCompareStr(S, Value) = 0;
+    end
+    else
+      Result := (Field.Value = Value);
+  end;
+
+  function CompareRecord: Boolean;
+  var
+    I: Integer;
+  begin
+    if FieldCount = 1 then
+      Result := CompareField(TField(fields.First), KeyValues)
+    else
+    begin
+      Result := True;
+      for I := 0 to FieldCount - 1 do
+        Result := Result and CompareField(TField(fields[I]), KeyValues[I]);
+    end;
+  end;
+
+begin
+  Result := False;
+  with DataSet do
+  begin
+    CheckBrowseMode;
+    if Bof and Eof then
+      Exit;
+  end;
+  fields := TList {$IFDEF RX_D17}<TField>{$ENDIF}.Create;
+  try
+    DataSet.GetFieldList(fields, KeyFields);
+    FieldCount := fields.Count;
+    Result := CompareRecord;
+    if Result then
+      Exit;
+    DataSet.DisableControls;
+    try
+      Bookmark := DataSet.Bookmark;
+      try
+        with DataSet do
+        begin
+          First;
+          while not Eof do
+          begin
+            Result := CompareRecord;
+            if Result then
+              Break;
+            Next;
+          end;
+        end;
+      finally
+        if not Result {$IFDEF RX_D3} and DataSet.BookmarkValid({$IFNDEF RX_D12} PChar {$ENDIF}(Bookmark)){$ENDIF} then
+          DataSet.Bookmark := Bookmark;
+      end;
+    finally
+      DataSet.EnableControls;
+    end;
+  finally
+    fields.Free;
+  end;
+end;
+{$ENDIF}
+
+function TRxMemoryData.Locate(const KeyFields: string; const KeyValues: Variant; Options: TLocateOptions): Boolean;
 begin
   DoBeforeScroll;
   Result := DataSetLocateThrough(Self, KeyFields, KeyValues, Options);
@@ -1346,17 +1492,16 @@ end;
 
 { Table Manipulation }
 
-function TRxMemoryData.Lookup(const KeyFields: string; const KeyValues: Variant;
-  const ResultFields: string): Variant;
+function TRxMemoryData.Lookup(const KeyFields: string; const KeyValues: Variant; const ResultFields: string): Variant;
 var
   FieldCount: Integer;
-  Fields: TList{$IFDEF RX_D17}<TField>{$ENDIF};
+  fields: TList {$IFDEF RX_D17}<TField>{$ENDIF};
   Fld: TField;
   SaveState: TDataSetState;
   I: Integer;
   Matched: Boolean;
 
-  function CompareField(var Field: TField; Value: Variant): Boolean; {BG}
+  function CompareField(var Field: TField; Value: Variant): Boolean; { BG }
   var
     S: string;
   begin
@@ -1380,7 +1525,7 @@ var
   begin
     if FieldCount = 1 then
     begin
-      Fld := TField(Fields.First);
+      Fld := TField(fields.First);
       Result := CompareField(Fld, KeyValues);
     end
     else
@@ -1388,7 +1533,7 @@ var
       Result := True;
       for I := 0 to FieldCount - 1 do
       begin
-        Fld := TField(Fields[I]);
+        Fld := TField(fields[I]);
         Result := Result and CompareField(Fld, KeyValues[I]);
       end;
     end;
@@ -1400,10 +1545,10 @@ begin
   if IsEmpty then
     Exit;
 
-  Fields := TList{$IFDEF RX_D17}<TField>{$ENDIF}.Create;
+  fields := TList {$IFDEF RX_D17}<TField>{$ENDIF}.Create;
   try
-    GetFieldList(Fields, KeyFields);
-    FieldCount := Fields.Count;
+    GetFieldList(fields, KeyFields);
+    FieldCount := fields.Count;
     Matched := CompareRecord;
     if Matched then
       Result := FieldValues[ResultFields]
@@ -1429,7 +1574,7 @@ begin
       end;
     end;
   finally
-    Fields.Free;
+    fields.Free;
   end;
 end;
 
@@ -1454,10 +1599,10 @@ procedure TRxMemoryData.CopyStructure(Source: TDataSet);
     begin
       if not (FieldDefs.Items[I].DataType in ftSupported) then
         FieldDefs.Items[I].Free
-      {$IFDEF RX_D4}
+{$IFDEF RX_D4}
       else
         CheckDataTypes(FieldDefs[I].ChildDefs);
-      {$ENDIF}
+{$ENDIF}
     end;
   end;
 
@@ -1465,8 +1610,10 @@ var
   I: Integer;
 begin
   CheckInactive;
-  for I := FieldCount - 1 downto 0 do Fields[I].Free;
-  if (Source = nil) then Exit;
+  for I := FieldCount - 1 downto 0 do
+    fields[I].Free;
+  if (Source = nil) then
+    Exit;
   Source.FieldDefs.Update;
   FieldDefs := Source.FieldDefs;
   CheckDataTypes(FieldDefs);
@@ -1482,15 +1629,74 @@ begin
   end;
 {$ENDIF}
 end;
+{$IFDEF RX_D3}
 
-function TRxMemoryData.LoadFromDataSet(Source: TDataSet; RecordCount: Integer;
-  Mode: TLoadMode): Integer;
+procedure _DBError(const Msg: string);
+begin
+  DatabaseError(Msg);
+end;
+{$ELSE}
+
+procedure _DBError(Ident: Word);
+begin
+  DBError(Ident);
+end;
+{$ENDIF}
+
+procedure AssignRecord(Source, Dest: TDataSet; ByName: Boolean);
+var
+  I: Integer;
+  F, FSrc: TField;
+begin
+  if not (Dest.State in dsEditModes) then
+    _DBError(SNotEditing);
+  if ByName then
+  begin
+    for I := 0 to Source.FieldCount - 1 do
+    begin
+      F := Dest.FindField(Source.fields[I].FieldName);
+      if F <> nil then
+      begin
+{$IFNDEF VER80}
+        F.Value := Source.fields[I].Value;
+{$ELSE}
+        if (F.DataType = Source.fields[I].DataType) and (F.DataSize = Source.fields[I].DataSize) then
+          F.Assign(Source.fields[I])
+        else
+          F.AsString := Source.fields[I].AsString;
+{$ENDIF}
+      end;
+    end;
+  end
+  else
+  begin
+    for I := 0 to Min(Source.FieldDefs.Count - 1, Dest.FieldDefs.Count - 1) do
+    begin
+      F := Dest.FindField(Dest.FieldDefs[I].Name);
+      FSrc := Source.FindField(Source.FieldDefs[I].Name);
+      if (F <> nil) and (FSrc <> nil) then
+      begin
+{$IFNDEF VER80}
+        F.Value := FSrc.Value;
+{$ELSE}
+        if F.DataType = FSrc.DataType then
+          F.Assign(FSrc)
+        else
+          F.AsString := FSrc.AsString;
+{$ENDIF}
+      end;
+    end;
+  end;
+end;
+
+function TRxMemoryData.LoadFromDataSet(Source: TDataSet; RecordCount: Integer; Mode: TLoadMode): Integer;
 var
   SourceActive: Boolean;
   MovedCount: Integer;
 begin
   Result := 0;
-  if Source = Self then Exit;
+  if Source = Self then
+    Exit;
   SourceActive := Source.Active;
   Source.DisableControls;
   try
@@ -1509,22 +1715,25 @@ begin
         CopyStructure(Source);
       end;
       FreeIndexList;
-      if not Active then Open;
+      if not Active then
+        Open;
       CheckBrowseMode;
-      if RecordCount > 0 then MovedCount := RecordCount
+      if RecordCount > 0 then
+        MovedCount := RecordCount
       else
       begin
         Source.First;
         MovedCount := MaxInt;
       end;
       try
-        while not Source.EOF do
+        while not Source.Eof do
         begin
           Append;
           AssignRecord(Source, Self, True);
           Post;
           Inc(Result);
-          if Result >= MovedCount then Break;
+          if Result >= MovedCount then
+            Break;
           Source.Next;
         end;
       finally
@@ -1534,7 +1743,8 @@ begin
       EnableControls;
     end;
   finally
-    if not SourceActive then Source.Close;
+    if not SourceActive then
+      Source.Close;
     Source.EnableControls;
   end;
 end;
@@ -1544,29 +1754,34 @@ var
   MovedCount: Integer;
 begin
   Result := 0;
-  if Dest = Self then Exit;
+  if Dest = Self then
+    Exit;
   CheckBrowseMode;
   UpdateCursorPos;
   Dest.DisableControls;
   try
     DisableControls;
     try
-      if not Dest.Active then Dest.Open
-      else Dest.CheckBrowseMode;
-      if RecordCount > 0 then MovedCount := RecordCount
+      if not Dest.Active then
+        Dest.Open
+      else
+        Dest.CheckBrowseMode;
+      if RecordCount > 0 then
+        MovedCount := RecordCount
       else
       begin
         First;
         MovedCount := MaxInt;
       end;
       try
-        while not EOF do
+        while not Eof do
         begin
           Dest.Append;
           AssignRecord(Self, Dest, True);
           Dest.Post;
           Inc(Result);
-          if Result >= MovedCount then Break;
+          if Result >= MovedCount then
+            Break;
           Next;
         end;
       finally
@@ -1596,7 +1811,7 @@ begin
     Sort;
   except
     FreeIndexList;
-    raise;
+    raise ;
   end;
 end;
 
@@ -1616,7 +1831,7 @@ begin
       except
         SetState(dsInactive);
         CloseCursor;
-        raise;
+        raise ;
       end;
     finally
       Bookmark := Pos;
@@ -1635,8 +1850,10 @@ begin
     J := R;
     P := Records[(L + R) shr 1];
     repeat
-      while Compare(Records[I], P) < 0 do Inc(I);
-      while Compare(Records[J], P) > 0 do Dec(J);
+      while Compare(Records[I], P) < 0 do
+        Inc(I);
+      while Compare(Records[J], P) > 0 do
+        Dec(J);
       if I <= J then
       begin
         FRecords.Exchange(I, J);
@@ -1644,7 +1861,8 @@ begin
         Dec(J);
       end;
     until I > J;
-    if L < J then QuickSort(L, J, Compare);
+    if L < J then
+      QuickSort(L, J, Compare);
     L := I;
   until I >= R;
 end;
@@ -1671,15 +1889,16 @@ begin
           begin
             Inc(Data1);
             Inc(Data2);
-            Result := CompareFields(Data1, Data2, F.DataType,
-              FCaseInsensitiveSort);
+            Result := CompareFields(Data1, Data2, F.DataType, FCaseInsensitiveSort);
           end
-          else if Boolean(Data1[0]) then
-            Result := 1
-          else if Boolean(Data2[0]) then
-            Result := -1;
+          else
+            if Boolean(Data1[0]) then
+              Result := 1
+            else
+              if Boolean(Data2[0]) then
+                Result := - 1;
           if FDescendingSort then
-            Result := -Result;
+            Result := - Result;
         end;
       end;
       if Result <> 0 then
@@ -1690,10 +1909,11 @@ begin
   begin
     if Item1.ID > Item2.ID then
       Result := 1
-    else if Item1.ID < Item2.ID then
-      Result := -1;
+    else
+      if Item1.ID < Item2.ID then
+        Result := - 1;
     if FDescendingSort then
-      Result := -Result;
+      Result := - Result;
   end;
 end;
 
@@ -1701,7 +1921,8 @@ function TRxMemoryData.GetIsIndexField(Field: TField): Boolean;
 begin
   if FIndexList <> nil then
     Result := FIndexList.IndexOf(Field) >= 0
-  else Result := False;
+  else
+    Result := False;
 end;
 
 procedure TRxMemoryData.CreateIndexList(const FieldNames: string);
@@ -1709,15 +1930,18 @@ var
   Pos: Integer;
   F: TField;
 begin
-  if FIndexList = nil then FIndexList := TList.Create
-  else FIndexList.Clear;
+  if FIndexList = nil then
+    FIndexList := TList.Create
+  else
+    FIndexList.Clear;
   Pos := 1;
   while Pos <= Length(FieldNames) do
   begin
     F := FieldByName(ExtractFieldName(FieldNames, Pos));
     if (F.FieldKind = fkData) and (F.DataType in ftSupported - ftBlobTypes) then
       FIndexList.Add(F)
-    else ErrorFmt(SFieldTypeMismatch, [F.DisplayName]);
+    else
+      ErrorFmt(SFieldTypeMismatch, [F.DisplayName]);
   end;
 end;
 
@@ -1734,27 +1958,33 @@ begin
   FMode := Mode;
   FField := Field;
   FDataSet := FField.DataSet as TRxMemoryData;
-  if not FDataSet.GetActiveRecBuf(FBuffer) then Exit;
+  if not FDataSet.GetActiveRecBuf(FBuffer) then
+    Exit;
   if not FField.Modified and (Mode <> bmRead) then
   begin
-    if FField.ReadOnly then ErrorFmt(SFieldReadOnly, [FField.DisplayName]);
-    if not (FDataSet.State in [dsEdit, dsInsert]) then Error(SNotEditing);
+    if FField.ReadOnly then
+      ErrorFmt(SFieldReadOnly, [FField.DisplayName]);
+    if not (FDataSet.State in [dsEdit, dsInsert]) then
+      Error(SNotEditing);
     FCached := True;
   end
-  else FCached := (FBuffer = TBuffer(FDataSet.ActiveBuffer));
+  else
+    FCached := (FBuffer = TBuffer(FDataSet.ActiveBuffer));
   FOpened := True;
-  if Mode = bmWrite then Truncate;
+  if Mode = bmWrite then
+    Truncate;
 end;
 
 destructor TMemBlobStream.Destroy;
 begin
-  if FOpened and FModified then FField.Modified := True;
+  if FOpened and FModified then
+    FField.Modified := True;
   if FModified then
-  try
-    FDataSet.DataEvent(deFieldChange, Longint(FField));
-  except
-    Application.HandleException(Self);
-  end;
+    try
+      FDataSet.DataEvent(deFieldChange, Longint(FField));
+    except
+      Application.HandleException(Self);
+    end;
 end;
 
 function TMemBlobStream.GetBlobFromRecord(Field: TField): TBlobDataType;
@@ -1764,8 +1994,11 @@ var
 begin
   Result := '';
   Pos := FDataSet.FRecordPos;
-  if (Pos < 0) and (FDataSet.RecordCount > 0) then Pos := 0
-  else if Pos >= FDataSet.RecordCount then Pos := FDataSet.RecordCount - 1;
+  if (Pos < 0) and (FDataSet.RecordCount > 0) then
+    Pos := 0
+  else
+    if Pos >= FDataSet.RecordCount then
+      Pos := FDataSet.RecordCount - 1;
   if (Pos >= 0) and (Pos < FDataSet.RecordCount) then
   begin
     Rec := FDataSet.Records[Pos];
@@ -1779,8 +2012,10 @@ begin
   Result := 0;
   if FOpened then
   begin
-    if Count > Size - FPosition then Result := Size - FPosition
-    else Result := Count;
+    if Count > Size - FPosition then
+      Result := Size - FPosition
+    else
+      Result := Count;
     if Result > 0 then
     begin
       if FCached then
@@ -1814,8 +2049,8 @@ begin
     FModified := True;
   end;
 end;
-
 {$IFDEF RX_D17}
+
 function TMemBlobStream.Write(const Buffer: TBytes; Offset, Count: Longint): Longint;
 var
   Temp: TBlobDataType;
@@ -1844,8 +2079,8 @@ begin
   end;
   Result := FPosition;
 end;
-
 {$IFDEF RX_D16}
+
 function TMemBlobStream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
 begin
   case Origin of
@@ -1875,14 +2110,12 @@ begin
     else
       Result := Length(GetBlobFromRecord(FField))
 end;
-
 {$ENDIF RX_D3}
-
 { TRxMemoryDataEx }
 
 procedure TRxMemoryDataEx.CopyStructure(Source: TDataSet);
 begin
-  inherited CopyStructure(source);
+  inherited CopyStructure(Source);
   RefreshFilteredRecordCount;
 end;
 
@@ -1891,8 +2124,8 @@ begin
   inherited;
   fSortOrder := soAsc;
   fSortCaseSens := scYes;
-  fAutoSortOnOpen := true;
-  fAutoRefreshOnFilterChanged := true;
+  fAutoSortOnOpen := True;
+  fAutoRefreshOnFilterChanged := True;
   fFilteredRecordCount := 0;
 end;
 
@@ -1907,15 +2140,14 @@ begin
   if Filtered and Active then
     Result := fFilteredRecordCount
   else
-    result := inherited GetRecordCount;
+    Result := inherited GetRecordCount;
 end;
 
-procedure TRxMemoryDataEx.InternalAddRecord(Buffer: Pointer;
-  Append: Boolean);
+procedure TRxMemoryDataEx.InternalAddRecord(Buffer: Pointer; Append: Boolean);
 begin
-  inherited InternalAddRecord(buffer, append);
+  inherited InternalAddRecord(Buffer, Append);
   if Active and Filtered then
-    inc(fFilteredRecordCount);
+    Inc(fFilteredRecordCount);
 end;
 
 procedure TRxMemoryDataEx.InternalDelete;
@@ -1926,17 +2158,18 @@ begin
 end;
 
 procedure TRxMemoryDataEx.InternalPost;
-var accept: Boolean;
+var
+  Accept: Boolean;
 begin
   inherited InternalPost;
   if Active and Filtered then
   begin
-    accept := true;
+    Accept := True;
 
-    if assigned(OnFilterRecord) then
+    if Assigned(OnFilterRecord) then
     begin
-      OnFilterRecord(self, accept);
-      if not accept then
+      OnFilterRecord(Self, Accept);
+      if not Accept then
         Dec(fFilteredRecordCount);
     end
   end
@@ -1952,51 +2185,52 @@ begin
   end;
 end;
 
-function TRxMemoryDataEx.IsSortField(field: TField): Boolean;
+function TRxMemoryDataEx.IsSortField(Field: TField): Boolean;
 var
-  s, whatToSearch: string;
+  S, whatToSearch: string;
   fieldNameEnd: Boolean;
-  i: integer;
+  I: Integer;
 begin
   Result := False;
-  whatToSearch := LowerCase(Trim(field.FieldName));
-  fieldNameEnd := false;
-  i := 1; s := '';
-  while (i <= Length(fSortFields)) do
+  whatToSearch := LowerCase(Trim(Field.FieldName));
+  fieldNameEnd := False;
+  I := 1;
+  S := '';
+  while (I <= Length(fSortFields)) do
   begin
-    case fSortFields[i] of
+    case fSortFields[I] of
       ';':
         begin
-          fieldNameEnd := true;
+          fieldNameEnd := True;
         end;
       ' ': ;
     else
-      s := s + fSortFields[i];
+      S := S + fSortFields[I];
     end;
-    if ((i + 1) > length(fSortFields)) or fieldNameEnd then
+    if ((I + 1) > Length(fSortFields)) or fieldNameEnd then
     begin
-      {s = s.strip(HString::both).to_lower();}
-      if s <> '' then
+      { s = s.strip(HString::both).to_lower(); }
+      if S <> '' then
       begin
-        if LowerCase(s) = whatToSearch then
+        if LowerCase(S) = whatToSearch then
         begin
           Result := True;
-          exit;
+          Exit;
         end
       end;
-      fieldNameEnd := false;
-      s := ''; ;
+      fieldNameEnd := False;
+      S := ''; ;
     end;
-    Inc(i);
+    Inc(I);
   end
 end;
 
-function TRxMemoryDataEx.LoadFromDataSet(Source: TDataSet;
-  RecordCount: Integer; Mode: TLoadMode): Integer;
-var wasFiltered: boolean;
+function TRxMemoryDataEx.LoadFromDataSet(Source: TDataSet; RecordCount: Integer; Mode: TLoadMode): Integer;
+var
+  wasFiltered: Boolean;
 begin
   wasFiltered := Filtered;
-  result := inherited LoadFromDataSet(source, recordCount, mode);
+  Result := inherited LoadFromDataSet(Source, RecordCount, Mode);
 
   Filtered := wasFiltered;
 
@@ -2010,23 +2244,23 @@ procedure TRxMemoryDataEx.RefreshFilteredRecordCount;
 var
   t: TDataSetState;
   savePlace: TBookmark;
-  i: integer;
+  I: Integer;
   _afterScroll, _beforeScroll: TDataSetNotifyEvent;
   dsCountingFilteredRecordCount: TDataSetState;
 begin
-//#define dsCountingFilteredRecordCount ((TDataSetState)(dsOpening+1))
-//type TDataSetState = (dsInactive, dsBrowse, dsEdit, dsInsert, dsSetKey, dsCalcFields, dsFilter, dsNewValue, dsOldValue, dsCurValue, dsBlockRead, dsInternalCalc, dsOpening);
+// #define dsCountingFilteredRecordCount ((TDataSetState)(dsOpening+1))
+// type TDataSetState = (dsInactive, dsBrowse, dsEdit, dsInsert, dsSetKey, dsCalcFields, dsFilter, dsNewValue, dsOldValue, dsCurValue, dsBlockRead, dsInternalCalc, dsOpening);
   fFilteredRecordCount := 0;
 
   if Filtered and Active then
   begin
-    i := 0;
+    I := 0;
 
     savePlace := GetBookmark();
     _afterScroll := AfterScroll;
     _beforeScroll := BeforeScroll;
     dsCountingFilteredRecordCount := TDataSetState(Ord(dsOpening) + 1);
-    {store last state}
+    { store last state }
     t := SetTempState(dsCountingFilteredRecordCount);
 
     try
@@ -2036,34 +2270,33 @@ begin
       First;
       while not Eof do
       begin
-        inc(i);
+        Inc(I);
         Next();
       end;
-      fFilteredRecordCount := i;
+      fFilteredRecordCount := I;
 
     finally
-      if (fFilteredRecordCount > 0) and assigned(savePlace) and BookmarkValid(savePlace) then
+      if (fFilteredRecordCount > 0) and Assigned(savePlace) and BookmarkValid(savePlace) then
         GotoBookmark(savePlace);
       FreeBookmark(savePlace);
       AfterScroll := _afterScroll;
       BeforeScroll := _beforeScroll;
-      {restore state here}
+      { restore state here }
       RestoreState(t);
       EnableControls;
     end
   end
 end;
 
-procedure TRxMemoryDataEx.ReSortOnFields(pSortOrder: TSortOrder;
-  fields: string);
+procedure TRxMemoryDataEx.ReSortOnFields(pSortOrder: TSortOrder; fields: string);
 var
   sAfterScroll: TDataSetNotifyEvent;
   savePlace: TBookmark;
-  b: boolean;
+  b: Boolean;
   oldSortFiels: string;
 begin
   if fields = '' then
-    fields := sortFields;
+    fields := SortFields;
 
   fSortOrder := pSortOrder; // new sort order
   oldSortFiels := fSortFields;
@@ -2074,10 +2307,10 @@ begin
   DisableControls();
   try
     savePlace := GetBookmark();
-    b := not boolean(fSortCaseSens);
+    b := not Boolean(fSortCaseSens);
     SortOnFields(fSortFields, b, fSortOrder = soDesc);
 
-    if assigned(savePlace) then
+    if Assigned(savePlace) then
       GotoBookmark(savePlace);
     FreeBookmark(savePlace);
   finally
@@ -2096,10 +2329,9 @@ begin
     RefreshFilteredRecordCount();
 end;
 
-procedure TRxMemoryDataEx.SetOnFilterRecord(
-  const Value: TFilterRecordEvent);
+procedure TRxMemoryDataEx.SetOnFilterRecord(const Value: TFilterRecordEvent);
 begin
-  inherited SetOnFilterRecord(value);
+  inherited SetOnFilterRecord(Value);
   if (fAutoRefreshOnFilterChanged) then
     InternalRefresh()
   else
